@@ -68,6 +68,10 @@ type CustomerInfo = {
 };
 
 const merchantNumber = "01779024048";
+const DASHBOARD_ORDERS_STORAGE_KEY = "satkhirar-amm-dashboard-orders";
+const DASHBOARD_ORDER_API =
+  process.env.NEXT_PUBLIC_DASHBOARD_ORDER_API ??
+  "http://localhost:3003/api/orders";
 
 export default function OrderConfirmPage() {
   const router = useRouter();
@@ -135,6 +139,60 @@ export default function OrderConfirmPage() {
     }
 
     const nextOrderNumber = `SA-${Date.now().toString().slice(-6)}`;
+    const selectedPayment = paymentMethods.find(
+      (method) => method.id === paymentMethod
+    );
+    const dashboardOrder = {
+      id: nextOrderNumber,
+      source: "website",
+      customer: {
+        name: customer.name,
+        phone: customer.phone,
+        email: customer.email,
+        district: customer.district,
+        area: customer.area,
+        address: customer.address,
+        note: customer.note,
+      },
+      items: cart.map((item) => ({
+        id: item.id,
+        name: item.name,
+        unit: item.unit,
+        quantity: item.quantity,
+        price: item.price,
+        image: item.image,
+      })),
+      payment: {
+        method: selectedPayment?.title ?? "ক্যাশ অন ডেলিভারি",
+        paymentPhone: customer.paymentPhone,
+        transactionId: customer.transactionId,
+      },
+      subtotal: cartTotal,
+      deliveryCharge,
+      total: grandTotal,
+      status: "নতুন অর্ডার",
+      date: new Date().toLocaleDateString("bn-BD", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }),
+    };
+    const existingOrdersRaw = window.localStorage.getItem(
+      DASHBOARD_ORDERS_STORAGE_KEY
+    );
+    const existingOrders = existingOrdersRaw ? JSON.parse(existingOrdersRaw) : [];
+
+    window.localStorage.setItem(
+      DASHBOARD_ORDERS_STORAGE_KEY,
+      JSON.stringify([dashboardOrder, ...existingOrders])
+    );
+    void fetch(DASHBOARD_ORDER_API, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(dashboardOrder),
+    }).catch(() => undefined);
 
     setOrderNumber(nextOrderNumber);
     markCartAsConfirmed(nextOrderNumber);
