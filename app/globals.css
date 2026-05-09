@@ -1,0 +1,155 @@
+/* app/globals.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: var(--font-josefin-sans), Arial, sans-serif;
+}
+
+p {
+  font-family: var(--font-josefin-sans), Arial, sans-serif;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-josefin-sans), Arial, sans-serif;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-color: theme("colors.primary") #050505;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: theme("colors.primary");
+  border: 2px solid #050505;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #fb923c;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  outline: none;
+  border: none;
+}
+
+.btn-slide-primary {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: theme("colors.primary");
+  color: #000;
+  transition: color 300ms ease;
+}
+
+.btn-slide-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: #ffffff;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 300ms ease;
+}
+
+.btn-slide-primary:hover::before {
+  transform: scaleX(1);
+}
+
+.marquee-track {
+  animation: marquee-scroll 35s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+.typing-title {
+  display: block;
+}
+
+.typing-title__content {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  vertical-align: top;
+  clip-path: inset(0 100% 0 0);
+}
+
+.typing-title.is-visible .typing-title__content {
+  animation: title-typing 1200ms steps(28, end) forwards;
+}
+
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes title-typing {
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typing-title__content {
+    clip-path: none;
+  }
+
+  .typing-title.is-visible .typing-title__content {
+    animation: none;
+  }
+}
