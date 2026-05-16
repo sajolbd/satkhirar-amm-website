@@ -74,6 +74,10 @@ const DASHBOARD_ORDERS_STORAGE_KEY = "satkhirar-amm-dashboard-orders";
 export default function OrderConfirmPage() {
   const router = useRouter();
   const { user, cart, cartTotal, openCart, markCartAsConfirmed } = useShop();
+  const activeCart = useMemo(
+    () => cart.filter((item) => item.orderStatus !== "confirmed"),
+    [cart]
+  );
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -113,11 +117,11 @@ export default function OrderConfirmPage() {
   }, [router, submitted]);
 
   const deliveryCharge = useMemo(() => {
-    if (cart.length === 0) return 0;
+    if (activeCart.length === 0) return 0;
     if (customer.district.trim() === "সাতক্ষীরা") return 80;
     if (customer.district.trim() === "ঢাকা") return 120;
     return 150;
-  }, [cart.length, customer.district]);
+  }, [activeCart.length, customer.district]);
 
   const grandTotal = cartTotal + deliveryCharge;
   const needsTransaction =
@@ -133,7 +137,7 @@ export default function OrderConfirmPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (cart.length === 0) {
+    if (activeCart.length === 0) {
       openCart();
       return;
     }
@@ -154,7 +158,7 @@ export default function OrderConfirmPage() {
         address: customer.address,
         note: customer.note,
       },
-      items: cart.map((item) => ({
+      items: activeCart.map((item) => ({
         id: item.id,
         name: item.name,
         unit: item.unit,
@@ -209,7 +213,7 @@ export default function OrderConfirmPage() {
     }
   };
 
-  if (cart.length === 0) {
+  if (activeCart.length === 0 && !submitted) {
     return (
       <main className="bg-[#fffaf6] py-12">
         <Container>
@@ -511,7 +515,7 @@ export default function OrderConfirmPage() {
             </div>
 
             <div className="space-y-4">
-              {cart.map((item) => (
+              {activeCart.map((item) => (
                 <div key={item.id} className="flex gap-3">
                   <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl">
                     <Image

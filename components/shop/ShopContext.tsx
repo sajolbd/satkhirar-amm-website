@@ -93,6 +93,10 @@ const USER_STORAGE_KEY = "satkhirar-amm-user";
 const TOKEN_STORAGE_KEY = "satkhirar-amm-token";
 const CART_STORAGE_KEY = "satkhirar-amm-cart";
 
+function getActiveCartItems(items: CartItem[]) {
+  return items.filter((item) => item.orderStatus !== "confirmed");
+}
+
 export function ShopProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [products, setProducts] = useState<Product[]>(popularMangoes);
@@ -241,10 +245,11 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     }
 
     setCart((current) => {
-      const found = current.find((item) => item.id === product.id);
+      const activeItems = getActiveCartItems(current);
+      const found = activeItems.find((item) => item.id === product.id);
 
       if (found) {
-        return current.map((item) =>
+        return activeItems.map((item) =>
           item.id === product.id
             ? {
                 ...item,
@@ -256,7 +261,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
         );
       }
 
-      return [...current, { ...product, quantity: 1 }];
+      return [...activeItems, { ...product, quantity: 1 }];
     });
 
     setIsCartOpen(true);
@@ -288,11 +293,15 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
   const markCartAsConfirmed = (orderNumber: string) => {
     setCart((current) =>
-      current.map((item) => ({
-        ...item,
-        orderStatus: "confirmed",
-        orderNumber,
-      }))
+      current.map((item) =>
+        item.orderStatus === "confirmed"
+          ? item
+          : {
+              ...item,
+              orderStatus: "confirmed",
+              orderNumber,
+            }
+      )
     );
   };
 
@@ -305,8 +314,14 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       isAuthOpen,
       authMode,
       isCartOpen,
-      cartCount: cart.reduce((total, item) => total + item.quantity, 0),
-      cartTotal: cart.reduce((total, item) => total + item.price * item.quantity, 0),
+      cartCount: getActiveCartItems(cart).reduce(
+        (total, item) => total + item.quantity,
+        0
+      ),
+      cartTotal: getActiveCartItems(cart).reduce(
+        (total, item) => total + item.price * item.quantity,
+        0
+      ),
       openAuth,
       closeAuth,
       openCart,
