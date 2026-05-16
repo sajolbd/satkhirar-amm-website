@@ -4,11 +4,10 @@ import Image from "next/image";
 import { ShoppingBag } from "lucide-react";
 
 import Container from "components/shared/Container";
-import { popularMangoes } from "data/popularMangoes";
 import { useShop } from "components/shop/ShopContext";
 
 export default function PopularMangoesSection() {
-  const { addToCart, openAuth } = useShop();
+  const { addToCart, openAuth, products } = useShop();
 
   return (
     <section className="bg-[#fffaf6] py-12 sm:py-16 lg:py-20">
@@ -33,7 +32,7 @@ export default function PopularMangoesSection() {
           </div>
 
           <div className="mt-8 grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-5">
-            {popularMangoes.map((product) => (
+            {products.map((product) => (
               <article
                 id={product.id}
                 key={product.id}

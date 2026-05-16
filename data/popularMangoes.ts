@@ -1,4 +1,4 @@
-import { Product } from "components/shop/ShopContext";
+import type { Product } from "components/shop/ShopContext";
 
 export const popularMangoes: Product[] = [
   {

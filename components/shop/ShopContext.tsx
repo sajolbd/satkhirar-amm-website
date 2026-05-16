@@ -3,11 +3,15 @@
 import {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
 } from "react";
+
+import { apiRequest, getApiError } from "lib/api";
+import { popularMangoes } from "data/popularMangoes";
 
 export type Product = {
   id: string;
@@ -18,6 +22,13 @@ export type Product = {
   discountLabel?: string;
   image: string;
   shortNote: string;
+  category?: string;
+  stock?: number;
+  sales?: number;
+  status?: string;
+  color?: string;
+  isActive?: boolean;
+  isFeatured?: boolean;
 };
 
 type CartItem = Product & {
@@ -27,19 +38,26 @@ type CartItem = Product & {
 };
 
 type UserProfile = {
+  id?: string;
   name: string;
   email: string;
   phone: string;
-};
-
-type StoredAccount = UserProfile & {
-  password: string;
+  source?: string;
+  status?: string;
+  joinedAt?: string;
 };
 
 type AuthMode = "signin" | "signup";
 
+type AuthResponse = {
+  token: string;
+  user: UserProfile;
+};
+
 type ShopContextType = {
   user: UserProfile | null;
+  products: Product[];
+  isProductsLoading: boolean;
   cart: CartItem[];
   isAuthOpen: boolean;
   authMode: AuthMode;
@@ -50,14 +68,18 @@ type ShopContextType = {
   closeAuth: () => void;
   openCart: () => void;
   closeCart: () => void;
-  signIn: (payload: { email: string; password: string }) => { ok: boolean; message?: string };
+  refreshProducts: () => Promise<void>;
+  signIn: (payload: {
+    email: string;
+    password: string;
+  }) => Promise<{ ok: boolean; message?: string }>;
   signUp: (payload: {
     name: string;
     email: string;
     phone: string;
     password: string;
     confirmPassword: string;
-  }) => { ok: boolean; message?: string };
+  }) => Promise<{ ok: boolean; message?: string }>;
   signOut: () => void;
   addToCart: (product: Product) => { ok: boolean; requiresAuth?: boolean; message?: string };
   removeFromCart: (productId: string) => void;
@@ -68,15 +90,33 @@ type ShopContextType = {
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
 
 const USER_STORAGE_KEY = "satkhirar-amm-user";
-const ACCOUNT_STORAGE_KEY = "satkhirar-amm-account";
+const TOKEN_STORAGE_KEY = "satkhirar-amm-token";
 const CART_STORAGE_KEY = "satkhirar-amm-cart";
 
 export function ShopProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [products, setProducts] = useState<Product[]>(popularMangoes);
+  const [isProductsLoading, setIsProductsLoading] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>("signin");
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const refreshProducts = useCallback(async () => {
+    setIsProductsLoading(true);
+
+    try {
+      const nextProducts = await apiRequest<Product[]>(
+        "/api/products?active=true&featured=true"
+      );
+
+      setProducts(nextProducts.length > 0 ? nextProducts : popularMangoes);
+    } catch {
+      setProducts(popularMangoes);
+    } finally {
+      setIsProductsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const storedUser = window.sessionStorage.getItem(USER_STORAGE_KEY);
@@ -90,6 +130,10 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       setCart(JSON.parse(storedCart));
     }
   }, []);
+
+  useEffect(() => {
+    void refreshProducts();
+  }, [refreshProducts]);
 
   useEffect(() => {
     if (user) {
@@ -120,35 +164,30 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     setIsCartOpen(false);
   };
 
-  const signIn = (payload: { email: string; password: string }) => {
+  const signIn = async (payload: { email: string; password: string }) => {
     if (!payload.email || !payload.password) {
-      return { ok: false, message: "ইমেইল এবং পাসওয়ার্ড দিন।" };
+      return { ok: false, message: "ইমেইল এবং পাসওয়ার্ড দিন।" };
     }
 
-    const accountRaw = window.localStorage.getItem(ACCOUNT_STORAGE_KEY);
-    const account: StoredAccount | null = accountRaw ? JSON.parse(accountRaw) : null;
-
-    if (
-      account &&
-      account.email === payload.email &&
-      account.password === payload.password
-    ) {
-      setUser({
-        name: account.name,
-        email: account.email,
-        phone: account.phone,
+    try {
+      const response = await apiRequest<AuthResponse>("/api/auth/signin", {
+        method: "POST",
+        body: JSON.stringify(payload),
       });
+
+      window.sessionStorage.setItem(TOKEN_STORAGE_KEY, response.token);
+      setUser(response.user);
       setIsAuthOpen(false);
       return { ok: true };
+    } catch (error) {
+      return {
+        ok: false,
+        message: getApiError(error, "লগইন করা যায়নি। আবার চেষ্টা করুন।"),
+      };
     }
-
-    return {
-      ok: false,
-      message: "এই ইমেইলে কোনো অ্যাকাউন্ট পাওয়া যায়নি। আগে সাইন আপ করুন।",
-    };
   };
 
-  const signUp = (payload: {
+  const signUp = async (payload: {
     name: string;
     email: string;
     phone: string;
@@ -160,32 +199,34 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     }
 
     if (payload.password.length < 6) {
-      return { ok: false, message: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।" };
+      return { ok: false, message: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।" };
     }
 
     if (payload.password !== payload.confirmPassword) {
-      return { ok: false, message: "পাসওয়ার্ড মিলছে না।" };
+      return { ok: false, message: "পাসওয়ার্ড মিলছে না।" };
     }
 
-    const nextAccount: StoredAccount = {
-      name: payload.name,
-      email: payload.email,
-      phone: payload.phone,
-      password: payload.password,
-    };
+    try {
+      const response = await apiRequest<AuthResponse>("/api/auth/signup", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
 
-    window.localStorage.setItem(ACCOUNT_STORAGE_KEY, JSON.stringify(nextAccount));
-    setUser({
-      name: nextAccount.name,
-      email: nextAccount.email,
-      phone: nextAccount.phone,
-    });
-    setIsAuthOpen(false);
-    return { ok: true };
+      window.sessionStorage.setItem(TOKEN_STORAGE_KEY, response.token);
+      setUser(response.user);
+      setIsAuthOpen(false);
+      return { ok: true };
+    } catch (error) {
+      return {
+        ok: false,
+        message: getApiError(error, "সাইন আপ সম্পন্ন হয়নি। আবার চেষ্টা করুন।"),
+      };
+    }
   };
 
   const signOut = () => {
     setUser(null);
+    window.sessionStorage.removeItem(TOKEN_STORAGE_KEY);
     setIsCartOpen(false);
   };
 
@@ -220,7 +261,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
     setIsCartOpen(true);
 
-    return { ok: true, message: "পণ্যটি কার্টে যোগ হয়েছে।" };
+    return { ok: true, message: "পণ্যটি কার্টে যোগ হয়েছে।" };
   };
 
   const removeFromCart = (productId: string) => {
@@ -258,6 +299,8 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       user,
+      products,
+      isProductsLoading,
       cart,
       isAuthOpen,
       authMode,
@@ -268,6 +311,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       closeAuth,
       openCart,
       closeCart,
+      refreshProducts,
       signIn,
       signUp,
       signOut,
@@ -276,7 +320,16 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       updateQuantity,
       markCartAsConfirmed,
     }),
-    [user, cart, isAuthOpen, authMode, isCartOpen]
+    [
+      user,
+      products,
+      isProductsLoading,
+      cart,
+      isAuthOpen,
+      authMode,
+      isCartOpen,
+      refreshProducts,
+    ]
   );
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;

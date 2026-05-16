@@ -11,7 +11,6 @@ import AuthModal from "components/layout/AuthModal";
 import CartDrawer from "components/layout/CartDrawer";
 import Container from "components/shared/Container";
 import { useShop } from "components/shop/ShopContext";
-import { popularMangoes } from "data/popularMangoes";
 
 const navItems = [
   { label: "হোম", href: "/" },
@@ -28,10 +27,10 @@ export default function Header() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { user, cartCount, openAuth, openCart, signOut } = useShop();
+  const { user, products, cartCount, openAuth, openCart, signOut } = useShop();
   const normalizedSearch = searchQuery.trim().toLowerCase();
   const searchResults = normalizedSearch
-    ? popularMangoes
+    ? products
         .filter((product) => {
           const searchableText = `${product.name} ${product.variety} ${product.id}`.toLowerCase();
           return searchableText.includes(normalizedSearch);

@@ -23,7 +23,7 @@ const ogImageUrl = `${siteUrl}/og-image.png`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "Satkhirar Amm",
+  title: "সাতক্ষীরার আম",
   description: "Satkhirar Amm Website",
   icons: {
     icon: "/favicon.png",
@@ -31,10 +31,11 @@ export const metadata: Metadata = {
     apple: "/apple-icon.png",
   },
   openGraph: {
-    title: "Satkhirar Amm",
-    description: "Satkhirar Amm Website",
+    title: "সাতক্ষীরার আম",
+    description:
+      "সাতক্ষীরার আম ওয়েবসাইটে স্বাগতম! আমরা সাতক্ষীরার আমের বিভিন্ন প্রজাতি এবং তাদের গুণাগুণ সম্পর্কে তথ্য প্রদান করি। আমাদের লক্ষ্য হল সাতক্ষীরার আমের প্রতি মানুষের আগ্রহ বৃদ্ধি করা এবং তাদের সঠিক পরিচিতি প্রদান করা।",
     url: siteUrl,
-    siteName: "Satkhirar Amm",
+    siteName: "সাতক্ষীরার আম",
     locale: "en_US",
     type: "website",
     images: [
@@ -48,8 +49,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "DXG Digital",
-    description: "Satkhirar Amm Website",
+    title: "সাতক্ষীরার আম",
+    description:
+      "সাতক্ষীরার আম ওয়েবসাইটে স্বাগতম! আমরা সাতক্ষীরার আমের বিভিন্ন প্রজাতি এবং তাদের গুণাগুণ সম্পর্কে তথ্য প্রদান করি।",
     images: [ogImageUrl],
   },
 };

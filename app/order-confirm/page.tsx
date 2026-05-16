@@ -19,6 +19,7 @@ import type { FormEvent, ReactNode } from "react";
 
 import Container from "components/shared/Container";
 import { useShop } from "components/shop/ShopContext";
+import { apiRequest, getApiError } from "lib/api";
 
 const paymentMethods = [
   {
@@ -69,15 +70,14 @@ type CustomerInfo = {
 
 const merchantNumber = "01779024048";
 const DASHBOARD_ORDERS_STORAGE_KEY = "satkhirar-amm-dashboard-orders";
-const DASHBOARD_ORDER_API =
-  process.env.NEXT_PUBLIC_DASHBOARD_ORDER_API ??
-  "http://localhost:3003/api/orders";
 
 export default function OrderConfirmPage() {
   const router = useRouter();
   const { user, cart, cartTotal, openCart, markCartAsConfirmed } = useShop();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [orderNumber, setOrderNumber] = useState("");
   const [customer, setCustomer] = useState<CustomerInfo>({
     name: "",
@@ -130,7 +130,7 @@ export default function OrderConfirmPage() {
     setCustomer((current) => ({ ...current, [field]: value }));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (cart.length === 0) {
@@ -182,22 +182,31 @@ export default function OrderConfirmPage() {
     );
     const existingOrders = existingOrdersRaw ? JSON.parse(existingOrdersRaw) : [];
 
-    window.localStorage.setItem(
-      DASHBOARD_ORDERS_STORAGE_KEY,
-      JSON.stringify([dashboardOrder, ...existingOrders])
-    );
-    void fetch(DASHBOARD_ORDER_API, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(dashboardOrder),
-    }).catch(() => undefined);
+    try {
+      setIsSubmitting(true);
+      setSubmitError("");
 
-    setOrderNumber(nextOrderNumber);
-    markCartAsConfirmed(nextOrderNumber);
-    setSubmitted(true);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+      const savedOrder = await apiRequest<typeof dashboardOrder>("/api/orders", {
+        method: "POST",
+        body: JSON.stringify(dashboardOrder),
+      });
+
+      window.localStorage.setItem(
+        DASHBOARD_ORDERS_STORAGE_KEY,
+        JSON.stringify([savedOrder, ...existingOrders])
+      );
+
+      setOrderNumber(savedOrder.id || nextOrderNumber);
+      markCartAsConfirmed(savedOrder.id || nextOrderNumber);
+      setSubmitted(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (error) {
+      setSubmitError(
+        getApiError(error, "অর্ডার সাবমিট করা যায়নি। আবার চেষ্টা করুন।")
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (cart.length === 0) {
@@ -546,9 +555,16 @@ export default function OrderConfirmPage() {
               </div>
             </div>
 
+            {submitError && (
+              <p className="mt-4 rounded-2xl bg-[#fff1e8] px-4 py-3 text-sm font-semibold text-[#9a3412]">
+                {submitError}
+              </p>
+            )}
+
             <button
               type="submit"
-              className="mt-6 w-full rounded-2xl bg-primary px-5 py-3.5 text-base font-semibold text-white transition hover:bg-[#ea580c]"
+              disabled={isSubmitting}
+              className="mt-6 w-full rounded-2xl bg-primary px-5 py-3.5 text-base font-semibold text-white transition hover:bg-[#ea580c] disabled:cursor-not-allowed disabled:bg-[#fdba74]"
             >
               অর্ডার সাবমিট করুন
             </button>

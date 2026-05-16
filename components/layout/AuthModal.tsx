@@ -41,9 +41,9 @@ export default function AuthModal() {
     return null;
   }
 
-  const handleSignIn = (event: FormEvent<HTMLFormElement>) => {
+  const handleSignIn = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const result = signIn(signInForm);
+    const result = await signIn(signInForm);
     if (!result.ok) {
       setMessage(result.message || "লগইন করা যায়নি।");
       return;
@@ -52,9 +52,9 @@ export default function AuthModal() {
     setSignInForm(initialSignIn);
   };
 
-  const handleSignUp = (event: FormEvent<HTMLFormElement>) => {
+  const handleSignUp = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const result = signUp(signUpForm);
+    const result = await signUp(signUpForm);
     if (!result.ok) {
       setMessage(result.message || "সাইন আপ সম্পন্ন হয়নি।");
       return;
