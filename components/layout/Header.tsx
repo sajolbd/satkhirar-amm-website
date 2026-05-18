@@ -104,7 +104,7 @@ export default function Header() {
               {user && (
                 <div className="hidden items-center gap-2 rounded-full border border-[#fdba74] bg-white px-4 py-2 text-sm font-medium text-[#7c2d12] xl:flex">
                   <UserRound className="h-4 w-4 text-primary" />
-                  <span>{user.name}</span>
+                  <span>{user.name || user.phone}</span>
                 </div>
               )}
 

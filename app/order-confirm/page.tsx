@@ -100,9 +100,9 @@ export default function OrderConfirmPage() {
 
     setCustomer((current) => ({
       ...current,
-      name: current.name || user.name,
+      name: current.name || user.name || "",
       phone: current.phone || user.phone,
-      email: current.email || user.email,
+      email: current.email || user.email || "",
     }));
   }, [user]);
 
