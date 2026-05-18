@@ -92,6 +92,7 @@ const ShopContext = createContext<ShopContextType | undefined>(undefined);
 const USER_STORAGE_KEY = "satkhirar-amm-user";
 const TOKEN_STORAGE_KEY = "satkhirar-amm-token";
 const CART_STORAGE_KEY = "satkhirar-amm-cart";
+const COMING_SOON_STATUS = "শীঘ্রই আসছে";
 
 function getActiveCartItems(items: CartItem[]) {
   return items.filter((item) => item.orderStatus !== "confirmed");
@@ -116,7 +117,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
       setProducts(nextProducts.length > 0 ? nextProducts : popularMangoes);
     } catch {
-      setProducts(popularMangoes);
+      setProducts((current) => (current.length > 0 ? current : popularMangoes));
     } finally {
       setIsProductsLoading(false);
     }
@@ -137,6 +138,24 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     void refreshProducts();
+  }, [refreshProducts]);
+
+  useEffect(() => {
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") {
+        void refreshProducts();
+      }
+    };
+
+    window.addEventListener("focus", refreshWhenVisible);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    const refreshTimer = window.setInterval(refreshProducts, 10000);
+
+    return () => {
+      window.removeEventListener("focus", refreshWhenVisible);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+      window.clearInterval(refreshTimer);
+    };
   }, [refreshProducts]);
 
   useEffect(() => {
@@ -235,6 +254,13 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   };
 
   const addToCart = (product: Product) => {
+    if (product.status === COMING_SOON_STATUS) {
+      return {
+        ok: false,
+        message: "এই পণ্যটি শীঘ্রই আসছে। এখন অর্ডার নেওয়া হচ্ছে না।",
+      };
+    }
+
     if (!user) {
       openAuth("signin");
       return {

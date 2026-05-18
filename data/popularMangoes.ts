@@ -10,6 +10,7 @@ export const popularMangoes: Product[] = [
     discountLabel: "১৫০ টাকা ডিসকাউন্ট",
     image: "/images/hero/mango-slide-1.png",
     shortNote: "শিশু থেকে বড় সবাইয়ের জন্য মিষ্টি আর নরম স্বাদের জনপ্রিয় পছন্দ।",
+    status: "স্টক আছে",
   },
   {
     id: "langra",
@@ -20,6 +21,7 @@ export const popularMangoes: Product[] = [
     discountLabel: "২০০ টাকা ডিসকাউন্ট",
     image: "/images/hero/mango-slide-2.png",
     shortNote: "যারা একটু গভীর সুবাস আর ঐতিহ্যবাহী আমের স্বাদ খোঁজেন তাদের জন্য আদর্শ।",
+    status: "শীঘ্রই আসছে",
   },
   {
     id: "amrapali",
@@ -30,6 +32,7 @@ export const popularMangoes: Product[] = [
     discountLabel: "১৮০ টাকা ডিসকাউন্ট",
     image: "/images/hero/mango-slide-3.png",
     shortNote: "কম বিচি আর গাঢ় রঙের শাঁসের জন্য গিফটিং ও ফ্যামিলি অর্ডারে খুব জনপ্রিয়।",
+    status: "শীঘ্রই আসছে",
   },
   {
     id: "fazli",
@@ -40,6 +43,7 @@ export const popularMangoes: Product[] = [
     discountLabel: "১২০ টাকা ডিসকাউন্ট",
     image: "/images/hero/mango-slide-1.png",
     shortNote: "বড় পরিবারের জন্য উপযোগী, শেক, জুস বা ফ্রেশ কাট সার্ভিংয়েও দারুণ।",
+    status: "শীঘ্রই আসছে",
   },
   {
     id: "gopalbhog",
@@ -50,5 +54,6 @@ export const popularMangoes: Product[] = [
     discountLabel: "১৬০ টাকা ডিসকাউন্ট",
     image: "/images/hero/mango-slide-2.png",
     shortNote: "মৌসুমের শুরুতেই যারা ভালো মানের আম চান তাদের জন্য আস্থার নাম।",
+    status: "শীঘ্রই আসছে",
   },
 ];

@@ -6,6 +6,8 @@ import { ShoppingBag } from "lucide-react";
 import Container from "components/shared/Container";
 import { useShop } from "components/shop/ShopContext";
 
+const COMING_SOON_STATUS = "শীঘ্রই আসছে";
+
 export default function PopularMangoesSection() {
   const { addToCart, openAuth, products } = useShop();
 
@@ -32,14 +34,17 @@ export default function PopularMangoesSection() {
           </div>
 
           <div className="mt-8 grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-5">
-            {products.map((product) => (
+            {products.map((product) => {
+              const isComingSoon = product.status === COMING_SOON_STATUS;
+
+              return (
               <article
                 id={product.id}
                 key={product.id}
                 className="group overflow-hidden rounded-[24px] border border-[#fed7aa] bg-white shadow-[0_16px_40px_rgba(124,45,18,0.08)] transition-transform hover:-translate-y-1 sm:rounded-[26px]"
               >
-                <div className="bg-[linear-gradient(135deg,#fb923c,#f97316)] px-4 py-3 text-center text-sm font-semibold text-white">
-                  {product.discountLabel}
+                <div className={`px-4 py-3 text-center text-sm font-semibold text-white ${isComingSoon ? "bg-[#7c2d12]" : "bg-[linear-gradient(135deg,#fb923c,#f97316)]"}`}>
+                  {isComingSoon ? COMING_SOON_STATUS : product.discountLabel}
                 </div>
 
                 <div className="p-4">
@@ -49,7 +54,7 @@ export default function PopularMangoesSection() {
                       alt={product.name}
                       fill
                       sizes="(min-width: 1280px) 220px, (min-width: 768px) 45vw, 100vw"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      className={`object-cover transition-transform duration-500 group-hover:scale-105 ${isComingSoon ? "grayscale" : ""}`}
                     />
                   </div>
 
@@ -73,20 +78,22 @@ export default function PopularMangoesSection() {
 
                   <button
                     type="button"
+                    disabled={isComingSoon}
                     onClick={() => {
                       const result = addToCart(product);
                       if (result.requiresAuth) {
                         openAuth("signin");
                       }
                     }}
-                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#ffb703] px-4 py-3 font-semibold text-white transition hover:bg-[#f59e0b]"
+                    className={`mt-6 flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 font-semibold text-white transition ${isComingSoon ? "cursor-not-allowed bg-[#7c2d12]/70" : "bg-[#ffb703] hover:bg-[#f59e0b]"}`}
                   >
                     <ShoppingBag className="h-5 w-5" />
-                    অর্ডার করুন
+                    {isComingSoon ? COMING_SOON_STATUS : "অর্ডার করুন"}
                   </button>
                 </div>
               </article>
-            ))}
+              );
+            })}
           </div>
 
           <div className="mt-8 rounded-[24px] border border-[#fed7aa] bg-[#fff7f1] px-4 py-5 text-[14px] leading-7 text-[#9a3412] sm:rounded-[28px] sm:px-6 sm:text-[15px] sm:leading-8">
