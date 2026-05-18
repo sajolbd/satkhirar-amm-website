@@ -11,8 +11,8 @@ import {
   PackageCheck,
   Phone,
   ShoppingBag,
-  Truck,
   Wallet,
+  X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
@@ -22,11 +22,6 @@ import { useShop } from "components/shop/ShopContext";
 import { apiRequest, getApiError } from "lib/api";
 
 const paymentMethods = [
-  {
-    id: "cash",
-    title: "ক্যাশ অন ডেলিভারি",
-    note: "পণ্য হাতে পেয়ে টাকা দিন",
-  },
   {
     id: "bkash",
     title: "বিকাশ",
@@ -62,7 +57,7 @@ type CustomerInfo = {
   email: string;
   district: string;
   area: string;
-  address: string;
+  courierOffice: string;
   note: string;
   paymentPhone: string;
   transactionId: string;
@@ -71,14 +66,25 @@ type CustomerInfo = {
 const merchantNumber = "01779024048";
 const DASHBOARD_ORDERS_STORAGE_KEY = "satkhirar-amm-dashboard-orders";
 
+function isDhakaDistrict(district: string) {
+  const normalizedDistrict = district.trim().toLowerCase();
+
+  return (
+    normalizedDistrict === "ঢাকা" ||
+    normalizedDistrict === "dhaka" ||
+    normalizedDistrict === "Dhaka"
+  );
+}
+
 export default function OrderConfirmPage() {
   const router = useRouter();
   const { user, cart, cartTotal, openCart, markCartAsConfirmed } = useShop();
   const activeCart = useMemo(
     () => cart.filter((item) => item.orderStatus !== "confirmed"),
-    [cart]
+    [cart],
   );
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("bkash");
+  const [isPaymentPopupOpen, setIsPaymentPopupOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -89,7 +95,7 @@ export default function OrderConfirmPage() {
     email: "",
     district: "ঢাকা",
     area: "",
-    address: "",
+    courierOffice: "",
     note: "",
     paymentPhone: "",
     transactionId: "",
@@ -118,20 +124,22 @@ export default function OrderConfirmPage() {
 
   const deliveryCharge = useMemo(() => {
     if (activeCart.length === 0) return 0;
-    if (customer.district.trim() === "সাতক্ষীরা") return 80;
-    if (customer.district.trim() === "ঢাকা") return 120;
-    return 150;
+    return isDhakaDistrict(customer.district) ? 80 : 120;
   }, [activeCart.length, customer.district]);
 
   const grandTotal = cartTotal + deliveryCharge;
-  const needsTransaction =
-    paymentMethod === "bkash" ||
-    paymentMethod === "nagad" ||
-    paymentMethod === "rocket" ||
-    paymentMethod === "bank";
+  const selectedPaymentMethod =
+    paymentMethods.find((method) => method.id === paymentMethod) ??
+    paymentMethods[0];
+  const deliveryFeeNote = "ঢাকার মধ্যে ডেলিভারি ৮০ টাকা, ঢাকার বাইরে ১২০ টাকা।";
 
   const updateCustomer = (field: keyof CustomerInfo, value: string) => {
     setCustomer((current) => ({ ...current, [field]: value }));
+  };
+
+  const selectPaymentMethod = (method: PaymentMethod) => {
+    setPaymentMethod(method);
+    setIsPaymentPopupOpen(true);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -142,10 +150,13 @@ export default function OrderConfirmPage() {
       return;
     }
 
+    if (!customer.paymentPhone.trim() || !customer.transactionId.trim()) {
+      setSubmitError("সেন্ড মানি নম্বর ও ট্রানজেকশন আইডি দিন।");
+      setIsPaymentPopupOpen(true);
+      return;
+    }
+
     const nextOrderNumber = `SA-${Date.now().toString().slice(-6)}`;
-    const selectedPayment = paymentMethods.find(
-      (method) => method.id === paymentMethod
-    );
     const dashboardOrder = {
       id: nextOrderNumber,
       source: "website",
@@ -155,7 +166,8 @@ export default function OrderConfirmPage() {
         email: customer.email,
         district: customer.district,
         area: customer.area,
-        address: customer.address,
+        address: customer.courierOffice,
+        courierOffice: customer.courierOffice,
         note: customer.note,
       },
       items: activeCart.map((item) => ({
@@ -167,7 +179,7 @@ export default function OrderConfirmPage() {
         image: item.image,
       })),
       payment: {
-        method: selectedPayment?.title ?? "ক্যাশ অন ডেলিভারি",
+        method: selectedPaymentMethod.title,
         paymentPhone: customer.paymentPhone,
         transactionId: customer.transactionId,
       },
@@ -182,22 +194,27 @@ export default function OrderConfirmPage() {
       }),
     };
     const existingOrdersRaw = window.localStorage.getItem(
-      DASHBOARD_ORDERS_STORAGE_KEY
+      DASHBOARD_ORDERS_STORAGE_KEY,
     );
-    const existingOrders = existingOrdersRaw ? JSON.parse(existingOrdersRaw) : [];
+    const existingOrders = existingOrdersRaw
+      ? JSON.parse(existingOrdersRaw)
+      : [];
 
     try {
       setIsSubmitting(true);
       setSubmitError("");
 
-      const savedOrder = await apiRequest<typeof dashboardOrder>("/api/orders", {
-        method: "POST",
-        body: JSON.stringify(dashboardOrder),
-      });
+      const savedOrder = await apiRequest<typeof dashboardOrder>(
+        "/api/orders",
+        {
+          method: "POST",
+          body: JSON.stringify(dashboardOrder),
+        },
+      );
 
       window.localStorage.setItem(
         DASHBOARD_ORDERS_STORAGE_KEY,
-        JSON.stringify([savedOrder, ...existingOrders])
+        JSON.stringify([savedOrder, ...existingOrders]),
       );
 
       setOrderNumber(savedOrder.id || nextOrderNumber);
@@ -206,7 +223,7 @@ export default function OrderConfirmPage() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
       setSubmitError(
-        getApiError(error, "অর্ডার সাবমিট করা যায়নি। আবার চেষ্টা করুন।")
+        getApiError(error, "অর্ডার সাবমিট করা যায়নি। আবার চেষ্টা করুন।"),
       );
     } finally {
       setIsSubmitting(false);
@@ -383,16 +400,16 @@ export default function OrderConfirmPage() {
                   />
                 </Field>
 
-                <Field label="সম্পূর্ণ ঠিকানা" required>
+                <Field label="কাছের কুরিয়ার সার্ভিস অফিসের ঠিকানা" required>
                   <textarea
                     required
                     rows={4}
-                    value={customer.address}
+                    value={customer.courierOffice}
                     onChange={(event) =>
-                      updateCustomer("address", event.target.value)
+                      updateCustomer("courierOffice", event.target.value)
                     }
                     className="w-full resize-none rounded-2xl border border-[#fed7aa] bg-[#fffaf6] px-4 py-3 text-[#7c2d12] outline-none focus:border-primary"
-                    placeholder="বাসা/রোড/গ্রাম/পোস্ট অফিসসহ সম্পূর্ণ ঠিকানা"
+                    placeholder="যেমন: সুন্দরবন/এসএ পরিবহন/করতোয়া কুরিয়ার, শাখার নাম ও ঠিকানা"
                   />
                 </Field>
 
@@ -433,7 +450,7 @@ export default function OrderConfirmPage() {
                       name="payment"
                       value={method.id}
                       checked={paymentMethod === method.id}
-                      onChange={() => setPaymentMethod(method.id)}
+                      onChange={() => selectPaymentMethod(method.id)}
                       className="sr-only"
                     />
                     <span className="block text-base font-bold text-[#7c2d12]">
@@ -446,26 +463,19 @@ export default function OrderConfirmPage() {
                 ))}
               </div>
 
-              {paymentMethod === "cash" && (
-                <PaymentNote icon={<Truck className="h-5 w-5" />}>
-                  ক্যাশ অন ডেলিভারিতে পণ্য হাতে পাওয়ার পরে ডেলিভারি ম্যানকে পুরো
-                  বিল পরিশোধ করুন।
-                </PaymentNote>
-              )}
-
               {(paymentMethod === "bkash" ||
                 paymentMethod === "nagad" ||
                 paymentMethod === "rocket") && (
                 <PaymentNote icon={<Wallet className="h-5 w-5" />}>
-                  {merchantNumber} নম্বরে পেমেন্ট করে নিচে পেমেন্ট নম্বর ও
+                  {merchantNumber} নম্বরে সেন্ড মানি করে পপআপে পেমেন্ট নম্বর ও
                   ট্রানজেকশন আইডি লিখুন।
                 </PaymentNote>
               )}
 
               {paymentMethod === "online" && (
                 <PaymentNote icon={<CreditCard className="h-5 w-5" />}>
-                  কার্ড বা অনলাইন পেমেন্টের জন্য অর্ডার সাবমিটের পরে নিরাপদ
-                  payment link SMS/WhatsApp এ পাঠানো হবে।
+                  কার্ড বা অনলাইন পেমেন্ট সম্পন্ন হলে পপআপে ট্রানজেকশন বা
+                  রেফারেন্স আইডি লিখুন।
                 </PaymentNote>
               )}
 
@@ -476,33 +486,29 @@ export default function OrderConfirmPage() {
                 </PaymentNote>
               )}
 
-              {needsTransaction && (
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <Field label="যে নম্বর থেকে পেমেন্ট করেছেন" required>
-                    <input
-                      required
-                      value={customer.paymentPhone}
-                      onChange={(event) =>
-                        updateCustomer("paymentPhone", event.target.value)
-                      }
-                      className="h-12 w-full rounded-2xl border border-[#fed7aa] bg-[#fffaf6] px-4 text-[#7c2d12] outline-none focus:border-primary"
-                      placeholder="01XXXXXXXXX"
-                    />
-                  </Field>
-
-                  <Field label="ট্রানজেকশন আইডি" required>
-                    <input
-                      required
-                      value={customer.transactionId}
-                      onChange={(event) =>
-                        updateCustomer("transactionId", event.target.value)
-                      }
-                      className="h-12 w-full rounded-2xl border border-[#fed7aa] bg-[#fffaf6] px-4 text-[#7c2d12] outline-none focus:border-primary"
-                      placeholder="Txn ID"
-                    />
-                  </Field>
+              <div className="mt-4 rounded-2xl border border-[#fed7aa] bg-[#fffaf6] px-4 py-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-[#7c2d12]">
+                      {customer.transactionId
+                        ? `ট্রানজেকশন আইডি: ${customer.transactionId}`
+                        : "ট্রানজেকশন আইডি দেওয়া হয়নি"}
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-[#9a3412]">
+                      ক্যাশ অন ডেলিভারি আপাতত বন্ধ।
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsPaymentPopupOpen(true)}
+                    className="rounded-xl border border-primary bg-white px-4 py-2 text-sm font-bold text-primary transition hover:bg-[#fff1e8]"
+                  >
+                    {customer.transactionId
+                      ? "আইডি পরিবর্তন"
+                      : "ট্রানজেকশন আইডি দিন"}
+                  </button>
                 </div>
-              )}
+              </div>
             </section>
           </div>
 
@@ -553,6 +559,9 @@ export default function OrderConfirmPage() {
                 label="ডেলিভারি চার্জ"
                 value={`${deliveryCharge.toLocaleString("bn-BD")} টাকা`}
               />
+              <p className="rounded-xl bg-[#fff7f1] px-3 py-2 text-xs font-semibold leading-5 text-[#9a3412]">
+                {deliveryFeeNote}
+              </p>
               <div className="flex items-center justify-between pt-3 text-lg font-bold">
                 <span>মোট বিল</span>
                 <span>{grandTotal.toLocaleString("bn-BD")} টাকা</span>
@@ -579,6 +588,76 @@ export default function OrderConfirmPage() {
               যাচাই করে তারপর অর্ডার প্রসেস হবে।
             </div>
           </aside>
+
+          {isPaymentPopupOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
+              <button
+                type="button"
+                aria-label="পপআপ বন্ধ করুন"
+                className="absolute inset-0 bg-[#431407]/45"
+                onClick={() => setIsPaymentPopupOpen(false)}
+              />
+              <div className="relative w-full max-w-[520px] rounded-[28px] border border-[#fed7aa] bg-white p-5 shadow-2xl sm:p-6">
+                <div className="mb-5 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-bold text-primary">
+                      {selectedPaymentMethod.title}
+                    </p>
+                    <h3 className="mt-1 text-xl font-bold text-[#7c2d12]">
+                      পেমেন্ট তথ্য দিন
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsPaymentPopupOpen(false)}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#fed7aa] bg-[#fffaf6] text-[#7c2d12] transition hover:border-primary"
+                    aria-label="পপআপ বন্ধ করুন"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <div className="mb-4 rounded-2xl bg-[#fff7f1] px-4 py-3 text-sm leading-6 text-[#9a3412]">
+                  {merchantNumber} নম্বরে পেমেন্ট করে নিচের তথ্য পূরণ করুন।
+                  ক্যাশ অন ডেলিভারি আপাতত বন্ধ।
+                </div>
+
+                <div className="grid gap-4">
+                  <Field label="যে নম্বর থেকে পেমেন্ট করেছেন" required>
+                    <input
+                      required
+                      value={customer.paymentPhone}
+                      onChange={(event) =>
+                        updateCustomer("paymentPhone", event.target.value)
+                      }
+                      className="h-12 w-full rounded-2xl border border-[#fed7aa] bg-[#fffaf6] px-4 text-[#7c2d12] outline-none focus:border-primary"
+                      placeholder="01XXXXXXXXX"
+                    />
+                  </Field>
+
+                  <Field label="ট্রানজেকশন আইডি" required>
+                    <input
+                      required
+                      value={customer.transactionId}
+                      onChange={(event) =>
+                        updateCustomer("transactionId", event.target.value)
+                      }
+                      className="h-12 w-full rounded-2xl border border-[#fed7aa] bg-[#fffaf6] px-4 text-[#7c2d12] outline-none focus:border-primary"
+                      placeholder="Txn ID"
+                    />
+                  </Field>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsPaymentPopupOpen(false)}
+                  className="mt-5 w-full rounded-2xl bg-primary px-5 py-3 text-base font-semibold text-white transition hover:bg-[#ea580c]"
+                >
+                  সংরক্ষণ করুন
+                </button>
+              </div>
+            </div>
+          )}
         </form>
       </Container>
     </main>
