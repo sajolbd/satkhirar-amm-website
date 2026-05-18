@@ -39,8 +39,8 @@ type CartItem = Product & {
 
 type UserProfile = {
   id?: string;
-  name: string;
-  email: string;
+  name?: string;
+  email?: string;
   phone: string;
   source?: string;
   status?: string;
@@ -70,15 +70,13 @@ type ShopContextType = {
   closeCart: () => void;
   refreshProducts: () => Promise<void>;
   signIn: (payload: {
-    email: string;
+    phone: string;
     password: string;
   }) => Promise<{ ok: boolean; message?: string }>;
   signUp: (payload: {
     name: string;
-    email: string;
     phone: string;
     password: string;
-    confirmPassword: string;
   }) => Promise<{ ok: boolean; message?: string }>;
   signOut: () => void;
   addToCart: (product: Product) => { ok: boolean; requiresAuth?: boolean; message?: string };
@@ -187,9 +185,9 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     setIsCartOpen(false);
   };
 
-  const signIn = async (payload: { email: string; password: string }) => {
-    if (!payload.email || !payload.password) {
-      return { ok: false, message: "ইমেইল এবং পাসওয়ার্ড দিন।" };
+  const signIn = async (payload: { phone: string; password: string }) => {
+    if (!payload.phone || !payload.password) {
+      return { ok: false, message: "মোবাইল নম্বর এবং পাসওয়ার্ড দিন।" };
     }
 
     try {
@@ -212,21 +210,15 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (payload: {
     name: string;
-    email: string;
     phone: string;
     password: string;
-    confirmPassword: string;
   }) => {
-    if (!payload.name || !payload.email || !payload.phone || !payload.password) {
-      return { ok: false, message: "সব তথ্য পূরণ করুন।" };
+    if (!payload.name || !payload.phone || !payload.password) {
+      return { ok: false, message: "নাম, মোবাইল নম্বর এবং পাসওয়ার্ড দিন।" };
     }
 
     if (payload.password.length < 6) {
       return { ok: false, message: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।" };
-    }
-
-    if (payload.password !== payload.confirmPassword) {
-      return { ok: false, message: "পাসওয়ার্ড মিলছে না।" };
     }
 
     try {

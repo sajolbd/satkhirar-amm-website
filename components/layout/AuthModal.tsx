@@ -6,16 +6,14 @@ import { X } from "lucide-react";
 import { useShop } from "components/shop/ShopContext";
 
 const initialSignIn = {
-  email: "",
+  phone: "",
   password: "",
 };
 
 const initialSignUp = {
   name: "",
-  email: "",
   phone: "",
   password: "",
-  confirmPassword: "",
 };
 
 export default function AuthModal() {
@@ -65,19 +63,16 @@ export default function AuthModal() {
 
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[#2d1204]/55 px-4 py-8">
-      <div
-        className="absolute inset-0"
-        onClick={closeAuth}
-      />
+      <div className="absolute inset-0" onClick={closeAuth} />
 
       <div className="relative z-10 w-full max-w-[520px] overflow-hidden rounded-[32px] border border-[#fed7aa] bg-white shadow-[0_30px_80px_rgba(124,45,18,0.22)]">
         <div className="flex items-start justify-between border-b border-[#ffedd5] bg-[linear-gradient(135deg,#fff7f1,#fff1e8)] px-6 py-5">
           <div>
             <p className="text-sm font-semibold tracking-[0.18em] text-primary">
-              নিরাপদ একাউন্ট প্রবেশ
+              নিরাপদ অ্যাকাউন্ট প্রবেশ
             </p>
             <h2 className="mt-2 text-2xl font-bold text-[#7c2d12]">
-              {authMode === "signin" ? "সাইন ইন করুন" : "নতুন একাউন্ট খুলুন"}
+              {authMode === "signin" ? "সাইন ইন করুন" : "নতুন অ্যাকাউন্ট খুলুন"}
             </h2>
           </div>
 
@@ -94,12 +89,11 @@ export default function AuthModal() {
           {authMode === "signin" ? (
             <form className="space-y-4" onSubmit={handleSignIn}>
               <Field
-                label="ইমেইল"
-                value={signInForm.email}
+                label="মোবাইল নম্বর"
+                value={signInForm.phone}
                 onChange={(value) =>
-                  setSignInForm((current) => ({ ...current, email: value }))
+                  setSignInForm((current) => ({ ...current, phone: value }))
                 }
-                type="email"
               />
               <Field
                 label="পাসওয়ার্ড"
@@ -126,14 +120,6 @@ export default function AuthModal() {
                 }
               />
               <Field
-                label="ইমেইল"
-                value={signUpForm.email}
-                onChange={(value) =>
-                  setSignUpForm((current) => ({ ...current, email: value }))
-                }
-                type="email"
-              />
-              <Field
                 label="মোবাইল নম্বর"
                 value={signUpForm.phone}
                 onChange={(value) =>
@@ -145,17 +131,6 @@ export default function AuthModal() {
                 value={signUpForm.password}
                 onChange={(value) =>
                   setSignUpForm((current) => ({ ...current, password: value }))
-                }
-                type="password"
-              />
-              <Field
-                label="পাসওয়ার্ড নিশ্চিত করুন"
-                value={signUpForm.confirmPassword}
-                onChange={(value) =>
-                  setSignUpForm((current) => ({
-                    ...current,
-                    confirmPassword: value,
-                  }))
                 }
                 type="password"
               />
@@ -188,7 +163,7 @@ export default function AuthModal() {
               </p>
             ) : (
               <p>
-                আগে থেকেই একাউন্ট আছে?{" "}
+                আগে থেকেই অ্যাকাউন্ট আছে?{" "}
                 <button
                   type="button"
                   onClick={() => openAuth("signin")}
