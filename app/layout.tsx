@@ -16,43 +16,63 @@ const josefinSans = Josefin_Sans({
   variable: "--font-josefin-sans",
 });
 
-const siteUrl = "https://dxg-digital.vercel.app";
-const ogImageUrl = `${siteUrl}/og-image.png`;
+function getSiteUrl() {
+  const configuredUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ||
+    process.env.VERCEL_URL ||
+    "http://localhost:3000";
+
+  const url = configuredUrl.startsWith("http")
+    ? configuredUrl
+    : `https://${configuredUrl}`;
+
+  return url.replace(/\/$/, "");
+}
+
+const siteUrl = getSiteUrl();
+const siteName = "সাতক্ষীরার আম";
+const siteDescription =
+  "সাতক্ষীরার ফ্রেশ আম, মধু ও দেশি পণ্য অনলাইনে অর্ডার করুন।";
+const ogImage = {
+  url: "/og-image.png",
+  width: 1200,
+  height: 630,
+  alt: "Satkhirar Amm official online store",
+};
 
 /* ---------------- METADATA ---------------- */
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "সাতক্ষীরার আম",
-  description: "Satkhirar Amm Website",
+  title: {
+    default: siteName,
+    template: `%s | ${siteName}`,
+  },
+  description: siteDescription,
+  applicationName: siteName,
   icons: {
-    icon: "/favicon.png",
-    shortcut: "/favicon.png",
-    apple: "/apple-icon.png",
+    icon: [{ url: "/favicon.png", sizes: "512x512", type: "image/png" }],
+    shortcut: [{ url: "/favicon.png", type: "image/png" }],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  alternates: {
+    canonical: "/",
   },
   openGraph: {
-    title: "সাতক্ষীরার আম",
-    description:
-      "সাতক্ষীরার আম ওয়েবসাইটে স্বাগতম! আমরা সাতক্ষীরার আমের বিভিন্ন প্রজাতি এবং তাদের গুণাগুণ সম্পর্কে তথ্য প্রদান করি। আমাদের লক্ষ্য হল সাতক্ষীরার আমের প্রতি মানুষের আগ্রহ বৃদ্ধি করা এবং তাদের সঠিক পরিচিতি প্রদান করা।",
-    url: siteUrl,
-    siteName: "সাতক্ষীরার আম",
-    locale: "en_US",
+    title: siteName,
+    description: siteDescription,
+    url: "/",
+    siteName,
+    locale: "bn_BD",
     type: "website",
-    images: [
-      {
-        url: ogImageUrl,
-        width: 1200,
-        height: 630,
-        alt: "Satkhirar Amm Logo",
-      },
-    ],
+    images: [ogImage],
   },
   twitter: {
     card: "summary_large_image",
-    title: "সাতক্ষীরার আম",
-    description:
-      "সাতক্ষীরার আম ওয়েবসাইটে স্বাগতম! আমরা সাতক্ষীরার আমের বিভিন্ন প্রজাতি এবং তাদের গুণাগুণ সম্পর্কে তথ্য প্রদান করি।",
-    images: [ogImageUrl],
+    title: siteName,
+    description: siteDescription,
+    images: [ogImage.url],
   },
 };
 
@@ -64,7 +84,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={josefinSans.variable}>
+    <html lang="bn" className={josefinSans.variable}>
       <body>
         {/* NoScript Fallback */}
         <noscript>

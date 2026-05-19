@@ -6,9 +6,14 @@ import {
   Twitter,
   Youtube,
   Headphones,
+  MessageCircle,
 } from "lucide-react";
 
 import Container from "components/shared/Container";
+
+const whatsappUrl = `https://wa.me/8801779024048?text=${encodeURIComponent(
+  "আসসালামু আলাইকুম, আমি সাতক্ষীরার আম থেকে পণ্য বা অর্ডার সম্পর্কে জানতে চাই।"
+)}`;
 
 const footerLinks = [
   {
@@ -122,7 +127,9 @@ export default function Footer() {
               <p>
                 মোবাইলঃ{" "}
                 <Link
-                  href="tel:+8801779024048"
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="font-semibold transition-colors hover:text-primary"
                 >
                   +৮৮০১৭৭৯০২৪০৪৮
@@ -167,13 +174,25 @@ export default function Footer() {
                 <Headphones className="h-6 w-6" />
 
                 <Link
-                  href="tel:+8801779024048"
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-[18px] font-semibold transition-colors hover:text-primary"
                 >
                   +৮৮০১৭৭৯০২৪০৪৮
                 </Link>
               </div>
             </div>
+
+            <Link
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-md bg-[#25d366] px-5 py-3 text-[15px] font-semibold text-white shadow-sm transition hover:-translate-y-1 hover:bg-[#1ebe5d]"
+            >
+              <MessageCircle className="h-5 w-5" />
+              হোয়াটসঅ্যাপে যোগাযোগ করুন
+            </Link>
           </div>
         </div>
       </Container>
