@@ -10,6 +10,7 @@ import type { FormEvent } from "react";
 import AuthModal from "components/layout/AuthModal";
 import CartDrawer from "components/layout/CartDrawer";
 import Container from "components/shared/Container";
+import ProfileDrawer from "components/layout/ProfileDrawer";
 import { useShop } from "components/shop/ShopContext";
 
 const navItems = [
@@ -26,6 +27,7 @@ const navItems = [
 export default function Header() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { user, products, cartCount, openAuth, openCart, signOut } = useShop();
   const normalizedSearch = searchQuery.trim().toLowerCase();
@@ -45,6 +47,11 @@ export default function Header() {
 
     router.push(`/mango#${searchResults[0].id}`);
     setSearchQuery("");
+  };
+
+  const handleSignOut = () => {
+    setIsProfileOpen(false);
+    signOut();
   };
 
   useEffect(() => {
@@ -102,10 +109,14 @@ export default function Header() {
 
             <div className="flex items-center gap-2 sm:gap-3 lg:flex-1 lg:justify-end">
               {user && (
-                <div className="hidden items-center gap-2 rounded-full border border-[#fdba74] bg-white px-4 py-2 text-sm font-medium text-[#7c2d12] xl:flex">
+                <button
+                  type="button"
+                  onClick={() => setIsProfileOpen(true)}
+                  className="hidden items-center gap-2 rounded-full border border-[#fdba74] bg-white px-4 py-2 text-sm font-medium text-[#7c2d12] transition-colors hover:border-primary hover:text-primary xl:flex"
+                >
                   <UserRound className="h-4 w-4 text-primary" />
                   <span>{user.name || user.phone}</span>
-                </div>
+                </button>
               )}
 
               <div className="hidden items-center gap-3 sm:flex">
@@ -123,13 +134,22 @@ export default function Header() {
                 </button>
 
                 {user ? (
-                  <button
-                    type="button"
-                    onClick={signOut}
-                    className="rounded-full border border-[#fdba74] px-4 py-2 text-sm font-semibold transition-colors hover:border-primary hover:text-primary"
-                  >
-                    লগআউট
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setIsProfileOpen(true)}
+                      className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#fdba74] bg-white text-[#7c2d12] transition-colors hover:text-primary xl:hidden"
+                    >
+                      <UserRound className="h-5 w-5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      className="rounded-full border border-[#fdba74] px-4 py-2 text-sm font-semibold transition-colors hover:border-primary hover:text-primary"
+                    >
+                      লগআউট
+                    </button>
+                  </>
                 ) : (
                   <button
                     type="button"
@@ -262,7 +282,7 @@ export default function Header() {
               </button>
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className={`mt-4 grid gap-2 ${user ? "grid-cols-3" : "grid-cols-2"}`}>
               <button
                 type="button"
                 onClick={() => {
@@ -278,17 +298,30 @@ export default function Header() {
               </button>
 
               {user ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    signOut();
-                  }}
-                  className="rounded-xl border border-[#fed7aa] bg-[#fff7f1] px-3 py-2.5 text-left"
-                >
-                  <span className="block text-xs text-[#9a3412]">একাউন্ট</span>
-                  <span className="mt-1 block text-sm font-semibold">লগআউট</span>
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      setIsProfileOpen(true);
+                    }}
+                    className="rounded-xl border border-[#fed7aa] bg-[#fff7f1] px-3 py-2.5 text-left"
+                  >
+                    <span className="block text-xs text-[#9a3412]">একাউন্ট</span>
+                    <span className="mt-1 block text-sm font-semibold">প্রোফাইল</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleSignOut();
+                    }}
+                    className="rounded-xl border border-[#fed7aa] bg-[#fff7f1] px-3 py-2.5 text-left"
+                  >
+                    <span className="block text-xs text-[#9a3412]">সেশন</span>
+                    <span className="mt-1 block text-sm font-semibold">লগআউট</span>
+                  </button>
+                </>
               ) : (
                 <button
                   type="button"
@@ -322,6 +355,7 @@ export default function Header() {
         </div>
       </div>
 
+      <ProfileDrawer isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
       <AuthModal />
       <CartDrawer />
     </>

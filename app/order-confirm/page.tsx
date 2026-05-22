@@ -65,16 +65,7 @@ type CustomerInfo = {
 
 const merchantNumber = "01779024048";
 const DASHBOARD_ORDERS_STORAGE_KEY = "satkhirar-amm-dashboard-orders";
-
-function isDhakaDistrict(district: string) {
-  const normalizedDistrict = district.trim().toLowerCase();
-
-  return (
-    normalizedDistrict === "ঢাকা" ||
-    normalizedDistrict === "dhaka" ||
-    normalizedDistrict === "Dhaka"
-  );
-}
+const DELIVERY_CHARGE = 120;
 
 export default function OrderConfirmPage() {
   const router = useRouter();
@@ -124,14 +115,14 @@ export default function OrderConfirmPage() {
 
   const deliveryCharge = useMemo(() => {
     if (activeCart.length === 0) return 0;
-    return isDhakaDistrict(customer.district) ? 80 : 120;
-  }, [activeCart.length, customer.district]);
+    return DELIVERY_CHARGE;
+  }, [activeCart.length]);
 
   const grandTotal = cartTotal + deliveryCharge;
   const selectedPaymentMethod =
     paymentMethods.find((method) => method.id === paymentMethod) ??
     paymentMethods[0];
-  const deliveryFeeNote = "ঢাকার মধ্যে ডেলিভারি ৮০ টাকা, ঢাকার বাইরে ১২০ টাকা।";
+  const deliveryFeeNote = "ঢাকা ও ঢাকার বাইরে একই ডেলিভারি চার্জ ১২০ টাকা।";
 
   const updateCustomer = (field: keyof CustomerInfo, value: string) => {
     setCustomer((current) => ({ ...current, [field]: value }));
