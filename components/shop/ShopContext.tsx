@@ -11,7 +11,6 @@ import {
 } from "react";
 
 import { apiRequest, getApiError } from "lib/api";
-import { popularMangoes } from "data/popularMangoes";
 
 export type Product = {
   id: string;
@@ -82,7 +81,11 @@ type ShopContextType = {
     password: string;
   }) => Promise<{ ok: boolean; message?: string }>;
   signOut: () => void;
-  addToCart: (product: Product) => { ok: boolean; requiresAuth?: boolean; message?: string };
+  addToCart: (product: Product) => {
+    ok: boolean;
+    requiresAuth?: boolean;
+    message?: string;
+  };
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, type: "increase" | "decrease") => void;
   markCartAsConfirmed: (orderNumber: string) => void;
@@ -101,7 +104,7 @@ function getActiveCartItems(items: CartItem[]) {
 
 export function ShopProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [products, setProducts] = useState<Product[]>(popularMangoes);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isProductsLoading, setIsProductsLoading] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -113,12 +116,12 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
     try {
       const nextProducts = await apiRequest<Product[]>(
-        "/api/products?active=true"
+        "/api/products?active=true",
       );
 
-      setProducts(nextProducts.length > 0 ? nextProducts : popularMangoes);
+      setProducts(nextProducts);
     } catch {
-      setProducts((current) => (current.length > 0 ? current : popularMangoes));
+      // Keep current products on error
     } finally {
       setIsProductsLoading(false);
     }
@@ -278,7 +281,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
                 orderStatus: undefined,
                 orderNumber: undefined,
               }
-            : item
+            : item,
         );
       }
 
@@ -308,7 +311,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
             orderNumber: undefined,
           };
         })
-        .filter((item) => item.quantity > 0)
+        .filter((item) => item.quantity > 0),
     );
   };
 
@@ -321,8 +324,8 @@ export function ShopProvider({ children }: { children: ReactNode }) {
               ...item,
               orderStatus: "confirmed",
               orderNumber,
-            }
-      )
+            },
+      ),
     );
   };
 
@@ -337,11 +340,11 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       isCartOpen,
       cartCount: getActiveCartItems(cart).reduce(
         (total, item) => total + item.quantity,
-        0
+        0,
       ),
       cartTotal: getActiveCartItems(cart).reduce(
         (total, item) => total + item.price * item.quantity,
-        0
+        0,
       ),
       openAuth,
       closeAuth,
@@ -365,7 +368,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       authMode,
       isCartOpen,
       refreshProducts,
-    ]
+    ],
   );
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;

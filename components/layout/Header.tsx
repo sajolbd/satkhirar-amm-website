@@ -102,7 +102,7 @@ export default function Header() {
                     className="group relative inline-flex items-center justify-center whitespace-nowrap py-2 text-[16px] font-medium text-[#7c2d12] transition-colors duration-300 hover:text-primary xl:text-[17px]"
                   >
                     <span>{item.label}</span>
-                    <span className="absolute bottom-0 left-0 h-[2px] w-full origin-left scale-x-0 rounded-full bg-primary transition-transform duration-300 ease-out group-hover:scale-x-100" />
+                    <span className="absolute bottom-0  left-0 h-[2px] w-full origin-left scale-x-0 rounded-full bg-primary transition-transform duration-300 ease-out group-hover:scale-x-100" />
                   </Link>
                 ))}
               </div>
