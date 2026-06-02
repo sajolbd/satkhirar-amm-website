@@ -19,7 +19,10 @@ export type Product = {
   variety: string;
   unit: string;
   price: number;
+  purchasePrice?: number;
+  menuSlug?: string;
   discountLabel?: string;
+  discountAmount?: number;
   image: string;
   shortNote: string;
   category?: string;
@@ -110,7 +113,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
     try {
       const nextProducts = await apiRequest<Product[]>(
-        "/api/products?active=true&featured=true"
+        "/api/products?active=true"
       );
 
       setProducts(nextProducts.length > 0 ? nextProducts : popularMangoes);

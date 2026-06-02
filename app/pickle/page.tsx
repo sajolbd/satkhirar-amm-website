@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import ComingSoonPage from "components/shared/ComingSoonPage";
+import ProductMenuPage from "components/shop/ProductMenuPage";
 import { comingSoonPages } from "data/comingSoonPages";
 
 export const metadata: Metadata = {
@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function PicklePage() {
-  return <ComingSoonPage content={comingSoonPages.pickle} />;
+  return <ProductMenuPage menuSlug="pickle" fallback={comingSoonPages.pickle} />;
 }

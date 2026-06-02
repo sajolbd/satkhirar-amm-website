@@ -1,5 +1,5 @@
 import HeroSection from "components/home/HeroSection";
-import PopularMangoesSection from "components/home/PopularMangoesSection";
+import HomeProductCategories from "components/home/HomeProductCategories";
 import TestimonialsSection from "components/home/TestimonialsSection";
 import WhyChooseUsSection from "components/home/WhyChooseUsSection";
 
@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <>
       <HeroSection />
-      <PopularMangoesSection />
+      <HomeProductCategories />
       <TestimonialsSection />
       <WhyChooseUsSection />
     </>

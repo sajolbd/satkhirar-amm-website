@@ -10,6 +10,7 @@ export const API_BASE_URL = (
 
 type ApiRequestOptions = RequestInit & {
   body?: BodyInit | null;
+  timeoutMs?: number;
 };
 
 export async function apiRequest<T>(
@@ -17,23 +18,35 @@ export async function apiRequest<T>(
   options: ApiRequestOptions = {}
 ): Promise<T> {
   const method = (options.method ?? "GET").toUpperCase();
+  const { timeoutMs = 6000, signal, ...requestOptions } = options;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    cache: method === "GET" ? "no-store" : options.cache,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers ?? {}),
-    },
-  });
-
-  const payload = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new Error(payload?.message || "API request failed.");
+  if (signal) {
+    signal.addEventListener("abort", () => controller.abort(), { once: true });
   }
 
-  return payload as T;
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      ...requestOptions,
+      cache: method === "GET" ? "no-store" : options.cache,
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers ?? {}),
+      },
+    });
+
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error(payload?.message || "API request failed.");
+    }
+
+    return payload as T;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export function getApiError(error: unknown, fallback: string) {

@@ -18,8 +18,8 @@ const navItems = [
   { label: "আম", href: "/mango" },
   //   { label: "ফ্রোজেন ফুড", href: "/frozen-food" },
   { label: "গুড়", href: "/gur" },
-  { label: "চারা", href: "/plants" },
-  { label: "আচার", href: "/pickle" },
+  // { label: "চারা", href: "/plants" },
+  // { label: "আচার", href: "/pickle" },
   { label: "তেল", href: "/oil" },
   { label: "মধু", href: "/honey" },
 ];
@@ -34,7 +34,8 @@ export default function Header() {
   const searchResults = normalizedSearch
     ? products
         .filter((product) => {
-          const searchableText = `${product.name} ${product.variety} ${product.id}`.toLowerCase();
+          const searchableText =
+            `${product.name} ${product.variety} ${product.id}`.toLowerCase();
           return searchableText.includes(normalizedSearch);
         })
         .slice(0, 5)
@@ -258,104 +259,114 @@ export default function Header() {
             mobileMenuOpen ? "translate-y-0" : "-translate-y-[120%]"
           }`}
         >
-            <div className="flex items-center justify-between">
-              <Link
-                href="/"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex h-12 w-[108px] items-center rounded-xl bg-[#fff7f1] px-2"
-              >
-                <Image
-                  src="/images/logo.png"
-                  alt="Logo"
-                  width={128}
-                  height={58}
-                  className="h-full w-full object-contain"
-                />
-              </Link>
+          <div className="flex items-center justify-between">
+            <Link
+              href="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex h-12 w-[108px] items-center rounded-xl bg-[#fff7f1] px-2"
+            >
+              <Image
+                src="/images/logo.png"
+                alt="Logo"
+                width={128}
+                height={58}
+                className="h-full w-full object-contain"
+              />
+            </Link>
 
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen(false)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#fed7aa] bg-[#fff7f1] text-[#7c2d12]"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(false)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#fed7aa] bg-[#fff7f1] text-[#7c2d12]"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
 
-            <div className={`mt-4 grid gap-2 ${user ? "grid-cols-3" : "grid-cols-2"}`}>
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  openCart();
-                }}
-                className="rounded-xl border border-[#fed7aa] bg-[#fff7f1] px-3 py-2.5 text-left"
-              >
-                <span className="block text-xs text-[#9a3412]">আপনার কার্ট</span>
-                <span className="mt-1 block text-sm font-semibold">
-                  {cartCount} আইটেম
-                </span>
-              </button>
+          <div
+            className={`mt-4 grid gap-2 ${user ? "grid-cols-3" : "grid-cols-2"}`}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                openCart();
+              }}
+              className="rounded-xl border border-[#fed7aa] bg-[#fff7f1] px-3 py-2.5 text-left"
+            >
+              <span className="block text-xs text-[#9a3412]">আপনার কার্ট</span>
+              <span className="mt-1 block text-sm font-semibold">
+                {cartCount} আইটেম
+              </span>
+            </button>
 
-              {user ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      setIsProfileOpen(true);
-                    }}
-                    className="rounded-xl border border-[#fed7aa] bg-[#fff7f1] px-3 py-2.5 text-left"
-                  >
-                    <span className="block text-xs text-[#9a3412]">একাউন্ট</span>
-                    <span className="mt-1 block text-sm font-semibold">প্রোফাইল</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      handleSignOut();
-                    }}
-                    className="rounded-xl border border-[#fed7aa] bg-[#fff7f1] px-3 py-2.5 text-left"
-                  >
-                    <span className="block text-xs text-[#9a3412]">সেশন</span>
-                    <span className="mt-1 block text-sm font-semibold">লগআউট</span>
-                  </button>
-                </>
-              ) : (
+            {user ? (
+              <>
                 <button
                   type="button"
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    openAuth("signin");
+                    setIsProfileOpen(true);
                   }}
                   className="rounded-xl border border-[#fed7aa] bg-[#fff7f1] px-3 py-2.5 text-left"
                 >
                   <span className="block text-xs text-[#9a3412]">একাউন্ট</span>
-                  <span className="mt-1 block text-sm font-semibold">সাইন ইন</span>
+                  <span className="mt-1 block text-sm font-semibold">
+                    প্রোফাইল
+                  </span>
                 </button>
-              )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleSignOut();
+                  }}
+                  className="rounded-xl border border-[#fed7aa] bg-[#fff7f1] px-3 py-2.5 text-left"
+                >
+                  <span className="block text-xs text-[#9a3412]">সেশন</span>
+                  <span className="mt-1 block text-sm font-semibold">
+                    লগআউট
+                  </span>
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  openAuth("signin");
+                }}
+                className="rounded-xl border border-[#fed7aa] bg-[#fff7f1] px-3 py-2.5 text-left"
+              >
+                <span className="block text-xs text-[#9a3412]">একাউন্ট</span>
+                <span className="mt-1 block text-sm font-semibold">
+                  সাইন ইন
+                </span>
+              </button>
+            )}
+          </div>
+
+          <nav className="mt-4 overflow-y-auto">
+            <div className="space-y-2">
+              {navItems.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between rounded-xl border border-[#fed7aa] bg-white px-4 py-3 text-[16px] font-semibold text-[#7c2d12] transition hover:bg-[#fff7f1]"
+                >
+                  <span>{item.label}</span>
+                </Link>
+              ))}
             </div>
-
-            <nav className="mt-4 overflow-y-auto">
-              <div className="space-y-2">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-between rounded-xl border border-[#fed7aa] bg-white px-4 py-3 text-[16px] font-semibold text-[#7c2d12] transition hover:bg-[#fff7f1]"
-                  >
-                    <span>{item.label}</span>
-                  </Link>
-                ))}
-              </div>
-            </nav>
-
+          </nav>
         </div>
       </div>
 
-      <ProfileDrawer isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+      <ProfileDrawer
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+      />
       <AuthModal />
       <CartDrawer />
     </>
