@@ -97,6 +97,15 @@ const USER_STORAGE_KEY = "satkhirar-amm-user";
 const TOKEN_STORAGE_KEY = "satkhirar-amm-token";
 const CART_STORAGE_KEY = "satkhirar-amm-cart";
 const COMING_SOON_STATUS = "শীঘ্রই আসছে";
+const CLOSED_STATUS = "বন্ধ";
+
+function isVisibleProduct(product: Product) {
+  return product.status !== CLOSED_STATUS;
+}
+
+function isUnavailableProduct(product: Product) {
+  return product.status === COMING_SOON_STATUS || product.isActive === false;
+}
 
 function getActiveCartItems(items: CartItem[]) {
   return items.filter((item) => item.orderStatus !== "confirmed");
@@ -115,11 +124,9 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     setIsProductsLoading(true);
 
     try {
-      const nextProducts = await apiRequest<Product[]>(
-        "/api/products?active=true",
-      );
+      const nextProducts = await apiRequest<Product[]>("/api/products");
 
-      setProducts(nextProducts);
+      setProducts(nextProducts.filter(isVisibleProduct));
     } catch {
       // Keep current products on error
     } finally {
@@ -252,7 +259,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   };
 
   const addToCart = (product: Product) => {
-    if (product.status === COMING_SOON_STATUS) {
+    if (isUnavailableProduct(product)) {
       return {
         ok: false,
         message: "এই পণ্যটি শীঘ্রই আসছে। এখন অর্ডার নেওয়া হচ্ছে না।",

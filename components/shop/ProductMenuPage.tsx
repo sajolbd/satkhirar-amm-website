@@ -25,6 +25,8 @@ const menuCategories: Record<string, string> = {
   "frozen-food": "ফ্রোজেন ফুড",
 };
 
+const CLOSED_STATUS = "বন্ধ";
+
 const menuCategoryAliases: Record<string, string[]> = {
   mango: ["আম"],
   gur: ["গুড়", "গুড়"],
@@ -139,11 +141,15 @@ export default function ProductMenuPage({ menuSlug, fallback }: ProductMenuPageP
     const loadProducts = async () => {
       try {
         const nextProducts = await apiRequest<Product[]>(
-          "/api/products?active=true"
+          "/api/products"
         );
 
         if (isMounted) {
-          setProducts(getMenuProducts(nextProducts, menuSlug));
+          setProducts(
+            getMenuProducts(nextProducts, menuSlug).filter(
+              (product) => product.status !== CLOSED_STATUS
+            )
+          );
         }
       } catch {
         if (isMounted) {

@@ -104,7 +104,9 @@ export default function PopularMangoesSection({
 
           <div className="mt-8 grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-5">
             {products.map((product) => {
-              const isComingSoon = product.status === COMING_SOON_STATUS;
+              const isComingSoon =
+                product.status === COMING_SOON_STATUS ||
+                product.isActive === false;
 
               return (
               <article

@@ -128,7 +128,8 @@ function getCategoryProducts(products: Product[], slug: string, category: string
 
 function ProductCard({ product }: { product: Product }) {
   const { addToCart, openAuth } = useShop();
-  const isComingSoon = product.isActive === false;
+  const isComingSoon =
+    product.status === COMING_SOON_STATUS || product.isActive === false;
   const discountLabel = isComingSoon ? COMING_SOON_STATUS : getDiscountLabel(product);
 
   return (

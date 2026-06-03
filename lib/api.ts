@@ -18,7 +18,7 @@ export async function apiRequest<T>(
   options: ApiRequestOptions = {}
 ): Promise<T> {
   const method = (options.method ?? "GET").toUpperCase();
-  const { timeoutMs = 6000, signal, ...requestOptions } = options;
+  const { timeoutMs = 15000, signal, ...requestOptions } = options;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
