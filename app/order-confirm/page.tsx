@@ -400,7 +400,7 @@ export default function OrderConfirmPage() {
                       updateCustomer("courierOffice", event.target.value)
                     }
                     className="w-full resize-none rounded-2xl border border-[#fed7aa] bg-[#fffaf6] px-4 py-3 text-[#7c2d12] outline-none focus:border-primary"
-                    placeholder="যেমন: সুন্দরবন/এসএ পরিবহন/করতোয়া কুরিয়ার, শাখার নাম ও ঠিকানা"
+                    placeholder="যেমন: জননী কুরিয়ার সার্ভুস, শাখার নাম ও ঠিকানা"
                   />
                 </Field>
 
@@ -463,7 +463,7 @@ export default function OrderConfirmPage() {
                 </PaymentNote>
               )}
 
-              {paymentMethod === "online" && (
+              {/* {paymentMethod === "online" && (
                 <PaymentNote icon={<CreditCard className="h-5 w-5" />}>
                   কার্ড বা অনলাইন পেমেন্ট সম্পন্ন হলে পপআপে ট্রানজেকশন বা
                   রেফারেন্স আইডি লিখুন।
@@ -475,7 +475,7 @@ export default function OrderConfirmPage() {
                   ব্যাংক ট্রান্সফারের তথ্য ফোনে কনফার্ম করা হবে। পেমেন্ট হয়ে
                   গেলে ট্রানজেকশন রেফারেন্স দিন।
                 </PaymentNote>
-              )}
+              )} */}
 
               <div className="mt-4 rounded-2xl border border-[#fed7aa] bg-[#fffaf6] px-4 py-3">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
