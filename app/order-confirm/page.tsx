@@ -5,10 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
-  CreditCard,
   MapPin,
   MessageSquare,
-  PackageCheck,
   Phone,
   ShoppingBag,
   Wallet,
@@ -31,21 +29,6 @@ const paymentMethods = [
     id: "nagad",
     title: "নগদ",
     note: "Send Money / Merchant Payment",
-  },
-  {
-    id: "rocket",
-    title: "রকেট",
-    note: "DBBL Rocket Payment",
-  },
-  {
-    id: "online",
-    title: "কার্ড / অনলাইন পেমেন্ট",
-    note: "SSLCommerz payment link পাঠানো হবে",
-  },
-  {
-    id: "bank",
-    title: "ব্যাংক ট্রান্সফার",
-    note: "অর্ডারের পরে ব্যাংক তথ্য কনফার্ম করা হবে",
   },
 ] as const;
 
@@ -454,28 +437,10 @@ export default function OrderConfirmPage() {
                 ))}
               </div>
 
-              {(paymentMethod === "bkash" ||
-                paymentMethod === "nagad" ||
-                paymentMethod === "rocket") && (
-                <PaymentNote icon={<Wallet className="h-5 w-5" />}>
-                  {merchantNumber} নম্বরে সেন্ড মানি করে পপআপে পেমেন্ট নম্বর ও
-                  ট্রানজেকশন আইডি লিখুন।
-                </PaymentNote>
-              )}
-
-              {/* {paymentMethod === "online" && (
-                <PaymentNote icon={<CreditCard className="h-5 w-5" />}>
-                  কার্ড বা অনলাইন পেমেন্ট সম্পন্ন হলে পপআপে ট্রানজেকশন বা
-                  রেফারেন্স আইডি লিখুন।
-                </PaymentNote>
-              )}
-
-              {paymentMethod === "bank" && (
-                <PaymentNote icon={<PackageCheck className="h-5 w-5" />}>
-                  ব্যাংক ট্রান্সফারের তথ্য ফোনে কনফার্ম করা হবে। পেমেন্ট হয়ে
-                  গেলে ট্রানজেকশন রেফারেন্স দিন।
-                </PaymentNote>
-              )} */}
+              <PaymentNote icon={<Wallet className="h-5 w-5" />}>
+                {merchantNumber} নম্বরে সেন্ড মানি করে পপআপে পেমেন্ট নম্বর ও
+                ট্রানজেকশন আইডি লিখুন।
+              </PaymentNote>
 
               <div className="mt-4 rounded-2xl border border-[#fed7aa] bg-[#fffaf6] px-4 py-3">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

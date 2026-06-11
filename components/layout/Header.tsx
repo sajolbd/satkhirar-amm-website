@@ -16,6 +16,7 @@ import { useShop } from "components/shop/ShopContext";
 const navItems = [
   { label: "হোম", href: "/" },
   { label: "আম", href: "/mango" },
+  { label: "ঘি", href: "/ghi" },
   //   { label: "ফ্রোজেন ফুড", href: "/frozen-food" },
   { label: "গুড়", href: "/gur" },
   // { label: "চারা", href: "/plants" },
@@ -40,13 +41,15 @@ export default function Header() {
         })
         .slice(0, 5)
     : [];
+  const getProductHref = (product: (typeof products)[number]) =>
+    `/${product.menuSlug || "mango"}#${product.id}`;
 
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (searchResults.length === 0) return;
 
-    router.push(`/mango#${searchResults[0].id}`);
+    router.push(getProductHref(searchResults[0]));
     setSearchQuery("");
   };
 
@@ -189,7 +192,7 @@ export default function Header() {
                         {searchResults.map((product) => (
                           <Link
                             key={product.id}
-                            href={`/mango#${product.id}`}
+                            href={getProductHref(product)}
                             onClick={() => setSearchQuery("")}
                             className="flex gap-3 rounded-2xl px-3 py-3 transition hover:bg-[#fff7f1]"
                           >

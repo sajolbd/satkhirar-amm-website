@@ -20,6 +20,13 @@ const categoryOrder = [
     href: "/mango",
   },
   {
+    slug: "ghi",
+    category: "ঘি",
+    label: "ঘি",
+    title: "খাঁটি দেশি ঘি",
+    href: "/ghi",
+  },
+  {
     slug: "honey",
     category: "মধু",
     label: "মধু",
@@ -65,6 +72,7 @@ const categoryOrder = [
 
 const categoryAliases: Record<string, string[]> = {
   mango: ["আম"],
+  ghi: ["ঘি"],
   honey: ["মধু"],
   gur: ["গুড়", "গুড়"],
   plants: ["চারা"],
